@@ -79,7 +79,7 @@ def create_app(*, autostart_scheduler: Optional[bool] = None):
         app.register_blueprint(settings.create_blueprint())
         app.register_blueprint(scheduler.create_blueprint(impl=legacy))
         app.register_blueprint(system.create_blueprint())
-        app.register_blueprint(audit.create_blueprint(impl=legacy))
+        app.register_blueprint(audit.create_blueprint())
 
         _APP_INSTANCE = app
 
