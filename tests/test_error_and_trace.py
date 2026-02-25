@@ -93,16 +93,21 @@ class ErrorAndTraceTests(unittest.TestCase):
             "trace_id": "",
         }
 
+        # 控制器现在使用 repositories 和 services，需要 mock 这些模块
+        from outlook_web.repositories import accounts as accounts_repo
+        from outlook_web.services import graph as graph_service
+        from outlook_web.services import imap as imap_service
+
         with patch.object(
-            self.module.impl,
+            accounts_repo,
             "get_account_by_email",
             return_value={"email": email_addr, "client_id": "cid", "refresh_token": "rt", "group_id": None},
         ), patch.object(
-            self.module.impl,
+            graph_service,
             "delete_emails_graph",
             return_value={"success": False, "error": graph_error, "success_count": 0, "failed_count": 2, "errors": ["e1"]},
         ), patch.object(
-            self.module.impl,
+            imap_service,
             "delete_emails_imap",
             side_effect=[
                 {"success": False, "error": "imap_new_failed"},
@@ -149,16 +154,21 @@ class ErrorAndTraceTests(unittest.TestCase):
             "errors": ["ProxyError: connect failed"],
         }
 
+        # 控制器现在使用 repositories 和 services，需要 mock 这些模块
+        from outlook_web.repositories import accounts as accounts_repo
+        from outlook_web.services import graph as graph_service
+        from outlook_web.services import imap as imap_service
+
         with patch.object(
-            self.module.impl,
+            accounts_repo,
             "get_account_by_email",
             return_value={"email": email_addr, "client_id": "cid", "refresh_token": "rt", "group_id": None},
         ), patch.object(
-            self.module.impl,
+            graph_service,
             "delete_emails_graph",
             return_value=graph_res,
         ), patch.object(
-            self.module.impl,
+            imap_service,
             "delete_emails_imap",
         ) as imap_mock:
             resp = client.post(

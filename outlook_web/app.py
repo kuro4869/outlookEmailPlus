@@ -73,7 +73,7 @@ def create_app(*, autostart_scheduler: Optional[bool] = None):
         app.register_blueprint(groups.create_blueprint())
         app.register_blueprint(tags.create_blueprint())
         app.register_blueprint(accounts.create_blueprint(impl=legacy))
-        app.register_blueprint(emails.create_blueprint(impl=legacy))
+        app.register_blueprint(emails.create_blueprint())
         app.register_blueprint(temp_emails.create_blueprint())
         app.register_blueprint(oauth.create_blueprint())
         app.register_blueprint(settings.create_blueprint())
