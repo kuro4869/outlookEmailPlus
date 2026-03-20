@@ -45,7 +45,7 @@ class NotificationDispatchTests(unittest.TestCase):
         email_addr: str,
         *,
         provider: str = "imap",
-        telegram_enabled: int = 0,
+        telegram_enabled: int = 1,
         telegram_cursor: str | None = "2026-03-01T00:00:00",
     ) -> int:
         conn = self.module.create_sqlite_connection()
@@ -199,6 +199,46 @@ class NotificationDispatchTests(unittest.TestCase):
             self.assertEqual(len(rows), 2)
             self.assertEqual({row["source_type"] for row in rows}, {"account", "temp_email"})
             self.assertTrue(all(row["status"] == "sent" for row in rows))
+
+    def test_unified_notification_job_skips_account_when_notification_disabled(self):
+        with self.app.app_context():
+            from outlook_web.db import get_db
+            from outlook_web.services import notification_dispatch
+
+            self._insert_account("disabled@example.com", telegram_enabled=0)
+            notification_dispatch.bootstrap_channel_cursors(
+                notification_dispatch.CHANNEL_EMAIL,
+                cursor_value="2026-03-01T00:00:00",
+            )
+            settings_repo.set_setting("email_notification_enabled", "true")
+            settings_repo.set_setting("email_notification_recipient", "notify@example.com")
+
+            with patch.dict(
+                os.environ,
+                {
+                    "EMAIL_NOTIFICATION_SMTP_HOST": "smtp.example.com",
+                    "EMAIL_NOTIFICATION_SMTP_PORT": "587",
+                    "EMAIL_NOTIFICATION_FROM": "noreply@example.com",
+                },
+                clear=False,
+            ), patch(
+                "outlook_web.services.notification_dispatch.fetch_source_messages"
+            ) as fetch_mock, patch(
+                "outlook_web.services.notification_dispatch.send_business_email_notification"
+            ) as send_mock:
+                notification_dispatch.run_notification_dispatch_job(self.app)
+
+            fetch_mock.assert_not_called()
+            send_mock.assert_not_called()
+            rows = get_db().execute(
+                "SELECT 1 FROM notification_delivery_logs WHERE source_key = ?",
+                (
+                    notification_dispatch.build_source_key(
+                        notification_dispatch.SOURCE_ACCOUNT, "disabled@example.com"
+                    ),
+                ),
+            ).fetchall()
+            self.assertEqual(rows, [])
 
     def test_missing_message_id_uses_stable_fallback_dedup(self):
         with self.app.app_context():
@@ -602,7 +642,7 @@ class NotificationDispatchTests(unittest.TestCase):
     def test_email_failure_does_not_block_telegram_delivery(self):
         with self.app.app_context():
             from outlook_web.db import get_db
-            from outlook_web.services import email_push, notification_dispatch, telegram_push
+            from outlook_web.services import email_push, notification_dispatch
 
             account_id = self._insert_account(
                 "dual-channel@example.com",
@@ -653,17 +693,9 @@ class NotificationDispatchTests(unittest.TestCase):
                     message_en="Failed to send test email",
                 ),
             ), patch(
-                "outlook_web.services.telegram_push._fetch_new_emails_imap",
-                return_value=message,
-            ), patch(
-                "outlook_web.services.telegram_push._send_telegram_message",
-                return_value=True,
-            ) as telegram_send, patch(
-                "outlook_web.services.telegram_push.TELEGRAM_PUSH_DELAY_SEC",
-                0,
-            ):
-                notification_dispatch.run_email_notification_job(self.app)
-                telegram_push.run_telegram_push_job(self.app)
+                "outlook_web.services.notification_dispatch.send_business_telegram_notification"
+            ) as telegram_send:
+                notification_dispatch.run_notification_dispatch_job(self.app)
 
             telegram_send.assert_called_once()
             rows = get_db().execute(

@@ -32,6 +32,8 @@ class V190FrontendContractTests(unittest.TestCase):
         self.assertIn("document.querySelector('.sidebar-bottom')", js)
         self.assertIn("root.querySelectorAll('[placeholder],[title],[aria-label],input[type=\"button\"][value]')", js)
         self.assertIn("const core = text.trim()", js)
+        self.assertIn("characterData: true", js)
+        self.assertIn("attributes: true", js)
 
     def test_main_js_does_not_override_i18n_runtime_helpers(self):
         client = self.app.test_client()
@@ -69,6 +71,15 @@ class V190FrontendContractTests(unittest.TestCase):
             "启用邮件通知",
             "接收通知邮箱",
             "发送测试邮件",
+            "🔍 全屏查看",
+            "🗑️ 删除",
+            "🔄 获取邮件",
+            "信任此邮件",
+            "🔄 Token 刷新管理",
+            "🔄 全量刷新",
+            "🔁 重试失败",
+            "失败邮箱",
+            "全量刷新历史",
             "📤 导出",
             "🔄 全量刷新 Token",
             "＋ 添加账号",
@@ -146,6 +157,8 @@ class V190FrontendContractTests(unittest.TestCase):
         self.assertIn("translateAppTextLocal('推送')", groups_js)
         self.assertIn("translateAppTextLocal('收件箱为空')", emails_js)
         self.assertIn("translateAppTextLocal('暂无邮件')", temp_emails_js)
+        self.assertIn("translateAppTextLocal('隐藏列表')", emails_js)
+        self.assertIn("translateAppTextLocal('🔄 获取邮件')", temp_emails_js)
 
     def test_frontend_import_and_export_error_contract_helpers_are_consumed(self):
         client = self.app.test_client()
@@ -166,3 +179,13 @@ class V190FrontendContractTests(unittest.TestCase):
         self.assertIn(".sidebar-collapsed .btn-github span { display: none; }", css)
         self.assertIn(".sidebar-collapsed .btn-github {", css)
         self.assertIn(".sidebar-collapsed #globalLanguageSwitcher.switcher-docked", i18n_js)
+
+    def test_frontend_runtime_copy_and_search_strings_use_i18n_contract(self):
+        client = self.app.test_client()
+        main_js = self._get_text(client, "/static/js/main.js")
+        groups_js = self._get_text(client, "/static/js/features/groups.js")
+        emails_js = self._get_text(client, "/static/js/features/emails.js")
+        self.assertIn("translateAppTextLocal(`当前已配置 ${normalized.length} 个多 Key。保留已有脱敏 api_key 表示不修改该 Key；清空后保存表示清空全部多 Key。`)", main_js)
+        self.assertIn("translateAppTextLocal('未设置（设置后可通过 /api/external/* 对外开放接口读取邮件与验证码）')", main_js)
+        self.assertIn("translateAppTextLocal(`搜索结果 (${data.accounts.length})`)", groups_js)
+        self.assertIn("replace(/\\s+\\((临时|Temp)\\)$/, '')", emails_js)

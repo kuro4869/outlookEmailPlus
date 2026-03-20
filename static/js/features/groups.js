@@ -398,7 +398,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    titleElement.textContent = `搜索结果 (${data.accounts.length})`;
+                    titleElement.textContent = translateAppTextLocal(`搜索结果 (${data.accounts.length})`);
                     renderAccountList(data.accounts);
                 } else {
                     container.innerHTML = '<div class="empty-state"><p>搜索失败</p></div>';

@@ -29,7 +29,9 @@ def _mask_secret_value(value: str, head: int = 4, tail: int = 4) -> str:
     safe_value = str(value)
     if len(safe_value) <= head + tail:
         return "*" * len(safe_value)
-    return safe_value[:head] + ("*" * (len(safe_value) - head - tail)) + safe_value[-tail:]
+    return (
+        safe_value[:head] + ("*" * (len(safe_value) - head - tail)) + safe_value[-tail:]
+    )
 
 
 def _parse_allowed_emails_input(raw: Any) -> list[str]:
@@ -45,7 +47,10 @@ def _parse_allowed_emails_input(raw: Any) -> list[str]:
             parsed = json.loads(text)
             values = parsed if isinstance(parsed, list) else []
         except (json.JSONDecodeError, TypeError):
-            values = [item.strip() for item in text.replace("\r", "\n").replace(",", "\n").split("\n")]
+            values = [
+                item.strip()
+                for item in text.replace("\r", "\n").replace(",", "\n").split("\n")
+            ]
 
     result: list[str] = []
     seen: set[str] = set()
@@ -126,20 +131,30 @@ def api_get_settings() -> Any:
         "refresh_delay_seconds": all_settings.get("refresh_delay_seconds", "5"),
         "refresh_cron": all_settings.get("refresh_cron", "0 2 * * *"),
         "use_cron_schedule": all_settings.get("use_cron_schedule", "false"),
-        "enable_scheduled_refresh": all_settings.get("enable_scheduled_refresh", "true"),
+        "enable_scheduled_refresh": all_settings.get(
+            "enable_scheduled_refresh", "true"
+        ),
         # 轮询配置
-        "enable_auto_polling": all_settings.get("enable_auto_polling", "false") == "true",
+        "enable_auto_polling": all_settings.get("enable_auto_polling", "false")
+        == "true",
         "polling_interval": int(all_settings.get("polling_interval", "10")),
         "polling_count": int(all_settings.get("polling_count", "5")),
-        "email_notification_enabled": all_settings.get("email_notification_enabled", "false").lower() == "true",
-        "email_notification_recipient": all_settings.get("email_notification_recipient", ""),
+        "email_notification_enabled": all_settings.get(
+            "email_notification_enabled", "false"
+        ).lower()
+        == "true",
+        "email_notification_recipient": all_settings.get(
+            "email_notification_recipient", ""
+        ),
     }
 
     # 敏感字段：不返回明文/哈希，仅提供"是否已设置/脱敏展示"
     login_password_value = all_settings.get("login_password") or ""
     gptmail_api_key_value = all_settings.get("gptmail_api_key") or ""
     external_api_key_value = settings_repo.get_external_api_key()
-    external_api_keys = external_api_keys_repo.list_external_api_keys(include_disabled=True)
+    external_api_keys = external_api_keys_repo.list_external_api_keys(
+        include_disabled=True
+    )
     usage_summary = external_api_keys_repo.get_external_api_usage_summary(
         [item.get("consumer_key") or "" for item in external_api_keys]
     )
@@ -157,23 +172,45 @@ def api_get_settings() -> Any:
         )
     safe_settings["login_password_set"] = bool(login_password_value)
     safe_settings["gptmail_api_key_set"] = bool(gptmail_api_key_value)
-    safe_settings["gptmail_api_key_masked"] = _mask_secret_value(gptmail_api_key_value) if gptmail_api_key_value else ""
+    safe_settings["gptmail_api_key_masked"] = (
+        _mask_secret_value(gptmail_api_key_value) if gptmail_api_key_value else ""
+    )
     safe_settings["external_api_key_set"] = bool(external_api_key_value)
-    safe_settings["external_api_key_masked"] = _mask_secret_value(external_api_key_value) if external_api_key_value else ""
+    safe_settings["external_api_key_masked"] = (
+        _mask_secret_value(external_api_key_value) if external_api_key_value else ""
+    )
     safe_settings["external_api_keys"] = external_api_keys
     safe_settings["external_api_keys_count"] = len(external_api_keys)
     safe_settings["external_api_multi_key_set"] = bool(external_api_keys)
 
     # P1：公网模式安全配置
-    safe_settings["external_api_public_mode"] = settings_repo.get_external_api_public_mode()
-    safe_settings["external_api_ip_whitelist"] = settings_repo.get_external_api_ip_whitelist()
-    safe_settings["external_api_rate_limit_per_minute"] = settings_repo.get_external_api_rate_limit()
-    safe_settings["external_api_disable_raw_content"] = settings_repo.get_external_api_disable_raw_content()
-    safe_settings["external_api_disable_wait_message"] = settings_repo.get_external_api_disable_wait_message()
-    safe_settings["external_api_disable_pool_claim_random"] = settings_repo.get_external_api_disable_pool_claim_random()
-    safe_settings["external_api_disable_pool_claim_release"] = settings_repo.get_external_api_disable_pool_claim_release()
-    safe_settings["external_api_disable_pool_claim_complete"] = settings_repo.get_external_api_disable_pool_claim_complete()
-    safe_settings["external_api_disable_pool_stats"] = settings_repo.get_external_api_disable_pool_stats()
+    safe_settings["external_api_public_mode"] = (
+        settings_repo.get_external_api_public_mode()
+    )
+    safe_settings["external_api_ip_whitelist"] = (
+        settings_repo.get_external_api_ip_whitelist()
+    )
+    safe_settings["external_api_rate_limit_per_minute"] = (
+        settings_repo.get_external_api_rate_limit()
+    )
+    safe_settings["external_api_disable_raw_content"] = (
+        settings_repo.get_external_api_disable_raw_content()
+    )
+    safe_settings["external_api_disable_wait_message"] = (
+        settings_repo.get_external_api_disable_wait_message()
+    )
+    safe_settings["external_api_disable_pool_claim_random"] = (
+        settings_repo.get_external_api_disable_pool_claim_random()
+    )
+    safe_settings["external_api_disable_pool_claim_release"] = (
+        settings_repo.get_external_api_disable_pool_claim_release()
+    )
+    safe_settings["external_api_disable_pool_claim_complete"] = (
+        settings_repo.get_external_api_disable_pool_claim_complete()
+    )
+    safe_settings["external_api_disable_pool_stats"] = (
+        settings_repo.get_external_api_disable_pool_stats()
+    )
     safe_settings["pool_external_enabled"] = settings_repo.get_pool_external_enabled()
 
     # Telegram 推送配置
@@ -181,7 +218,9 @@ def api_get_settings() -> Any:
     if tg_bot_token_raw and is_encrypted(tg_bot_token_raw):
         try:
             plain_token = decrypt_data(tg_bot_token_raw)
-            safe_settings["telegram_bot_token"] = "****" + plain_token[-4:] if len(plain_token) > 4 else "****"
+            safe_settings["telegram_bot_token"] = (
+                "****" + plain_token[-4:] if len(plain_token) > 4 else "****"
+            )
         except Exception:
             safe_settings["telegram_bot_token"] = "****"
     else:
@@ -198,7 +237,9 @@ def api_get_settings() -> Any:
     # 同时在顶层暴露 telegram 字段（兼容前端直接访问）
     response["telegram_bot_token"] = safe_settings.get("telegram_bot_token", "")
     response["telegram_chat_id"] = safe_settings.get("telegram_chat_id", "")
-    response["telegram_poll_interval"] = safe_settings.get("telegram_poll_interval", 600)
+    response["telegram_poll_interval"] = safe_settings.get(
+        "telegram_poll_interval", 600
+    )
 
     return jsonify(response)
 
@@ -227,13 +268,22 @@ def api_update_settings() -> Any:
     pending_operations: list[Any] = []
 
     def queue_setting_update(key: str, value: str) -> None:
-        pending_operations.append(lambda key=key, value=value: settings_repo.set_setting(key, value, commit=False))
+        pending_operations.append(
+            lambda key=key, value=value: settings_repo.set_setting(
+                key, value, commit=False
+            )
+        )
 
     def queue_operation(op: Any) -> None:
         pending_operations.append(op)
 
-    current_email_notification_enabled = settings_repo.get_setting("email_notification_enabled", "false").lower() == "true"
-    current_email_notification_recipient = settings_repo.get_setting("email_notification_recipient", "").strip()
+    current_email_notification_enabled = (
+        settings_repo.get_setting("email_notification_enabled", "false").lower()
+        == "true"
+    )
+    current_email_notification_recipient = settings_repo.get_setting(
+        "email_notification_recipient", ""
+    ).strip()
     target_email_notification_enabled = current_email_notification_enabled
     target_email_notification_recipient = current_email_notification_recipient
 
@@ -243,16 +293,23 @@ def api_update_settings() -> Any:
             default=current_email_notification_enabled,
         )
     if "email_notification_recipient" in data:
-        target_email_notification_recipient = str(data.get("email_notification_recipient") or "").strip()
+        target_email_notification_recipient = str(
+            data.get("email_notification_recipient") or ""
+        ).strip()
 
     if "email_notification_enabled" in data or "email_notification_recipient" in data:
-        if target_email_notification_enabled and not target_email_notification_recipient:
+        if (
+            target_email_notification_enabled
+            and not target_email_notification_recipient
+        ):
             return _json_error(
                 "EMAIL_NOTIFICATION_RECIPIENT_REQUIRED",
                 "请填写接收通知邮箱",
                 message_en="Please provide a notification recipient email address",
             )
-        if target_email_notification_recipient and not _is_valid_notification_email(target_email_notification_recipient):
+        if target_email_notification_recipient and not _is_valid_notification_email(
+            target_email_notification_recipient
+        ):
             return _json_error(
                 "EMAIL_NOTIFICATION_RECIPIENT_INVALID",
                 "接收通知邮箱格式无效",
@@ -270,11 +327,20 @@ def api_update_settings() -> Any:
                     details=exc.details,
                 )
         if "email_notification_enabled" in data:
-            queue_setting_update("email_notification_enabled", "true" if target_email_notification_enabled else "false")
+            queue_setting_update(
+                "email_notification_enabled",
+                "true" if target_email_notification_enabled else "false",
+            )
             updated.append("邮件通知开关")
+            # PRD-00008 / Resolve 文档：邮件通知设置变更需触发调度器重载
+            scheduler_reload_needed = True
         if "email_notification_recipient" in data:
-            queue_setting_update("email_notification_recipient", target_email_notification_recipient)
+            queue_setting_update(
+                "email_notification_recipient", target_email_notification_recipient
+            )
             updated.append("邮件通知接收邮箱")
+            # PRD-00008 / Resolve 文档：收件人变更也需重载调度器（影响轮询间隔选择）
+            scheduler_reload_needed = True
 
     # 更新登录密码
     if "login_password" in data:
@@ -292,7 +358,11 @@ def api_update_settings() -> Any:
     if "gptmail_api_key" in data:
         new_api_key = str(data["gptmail_api_key"] or "").strip()
         existing_api_key = settings_repo.get_setting("gptmail_api_key", "") or ""
-        if new_api_key and existing_api_key and new_api_key == _mask_secret_value(existing_api_key):
+        if (
+            new_api_key
+            and existing_api_key
+            and new_api_key == _mask_secret_value(existing_api_key)
+        ):
             updated.append("GPTMail API Key（未变更）")
         elif new_api_key:
             queue_setting_update("gptmail_api_key", new_api_key)
@@ -327,7 +397,10 @@ def api_update_settings() -> Any:
             errors.append("external_api_keys 必须是数组")
         else:
             existing_keys = {
-                int(item["id"]): item for item in external_api_keys_repo.list_external_api_keys(include_disabled=True)
+                int(item["id"]): item
+                for item in external_api_keys_repo.list_external_api_keys(
+                    include_disabled=True
+                )
             }
             normalized_items: list[dict[str, Any]] = []
             seen_names: set[str] = set()
@@ -371,8 +444,13 @@ def api_update_settings() -> Any:
                     api_key_value = None
 
                 allowed_emails = _parse_allowed_emails_input(item.get("allowed_emails"))
-                if item.get("allowed_emails") not in (None, "", []) and not allowed_emails:
-                    errors.append(f"external_api_keys[{index}].allowed_emails 至少包含一个合法邮箱")
+                if (
+                    item.get("allowed_emails") not in (None, "", [])
+                    and not allowed_emails
+                ):
+                    errors.append(
+                        f"external_api_keys[{index}].allowed_emails 至少包含一个合法邮箱"
+                    )
                     continue
 
                 normalized_items.append(
@@ -381,7 +459,9 @@ def api_update_settings() -> Any:
                         "name": name,
                         "api_key": api_key_value,
                         "allowed_emails": allowed_emails,
-                        "pool_access": _parse_bool_input(item.get("pool_access"), default=False),
+                        "pool_access": _parse_bool_input(
+                            item.get("pool_access"), default=False
+                        ),
                         "enabled": _parse_bool_input(item.get("enabled"), default=True),
                     }
                 )
@@ -638,12 +718,16 @@ def api_update_settings() -> Any:
             )
 
         scheduler_reloaded = None
-        email_notification_just_enabled = (not current_email_notification_enabled) and target_email_notification_enabled
+        email_notification_just_enabled = (
+            not current_email_notification_enabled
+        ) and target_email_notification_enabled
         if email_notification_just_enabled:
             try:
                 from outlook_web.services import notification_dispatch
 
-                notification_dispatch.bootstrap_channel_cursors(notification_dispatch.CHANNEL_EMAIL)
+                notification_dispatch.bootstrap_channel_cursors(
+                    notification_dispatch.CHANNEL_EMAIL
+                )
             except Exception:
                 pass
 
@@ -790,9 +874,13 @@ def api_test_telegram() -> Any:
             message_en="Please configure Telegram Bot Token and Chat ID first",
         )
 
-    bot_token = decrypt_data(bot_token_raw) if is_encrypted(bot_token_raw) else bot_token_raw
+    bot_token = (
+        decrypt_data(bot_token_raw) if is_encrypted(bot_token_raw) else bot_token_raw
+    )
 
-    ok = _send_telegram_message(bot_token, chat_id, "✅ Outlook Email Plus 测试消息：配置正确！")
+    ok = _send_telegram_message(
+        bot_token, chat_id, "✅ Outlook Email Plus 测试消息：配置正确！"
+    )
     if ok:
         log_audit("telegram_test", "settings", None, "测试消息发送成功")
         return jsonify(

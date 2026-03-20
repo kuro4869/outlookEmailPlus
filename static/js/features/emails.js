@@ -492,10 +492,10 @@
 
             if (isListVisible) {
                 syncEmailListVisibility(true);
-                toggleText.textContent = '隐藏列表';
+                toggleText.textContent = translateAppTextLocal('隐藏列表');
             } else {
                 syncEmailListVisibility(false);
-                toggleText.textContent = '显示列表';
+                toggleText.textContent = translateAppTextLocal('显示列表');
             }
         }
 
@@ -727,7 +727,7 @@
             syncEmailListVisibility(true);
             isListVisible = true;
             var t = document.getElementById('toggleListText');
-            if (t) t.textContent = '隐藏列表';
+            if (t) t.textContent = translateAppTextLocal('隐藏列表');
             if (typeof hideEmailDetailSection === 'function') {
                 hideEmailDetailSection();
             }
@@ -789,7 +789,7 @@
         function copyCurrentEmail() {
             const emailElement = document.getElementById('currentAccountEmail');
             if (emailElement && emailElement.textContent) {
-                const email = emailElement.textContent.replace(' (临时)', '').trim();
+                const email = emailElement.textContent.replace(/\s+\((临时|Temp)\)$/, '').trim();
                 copyEmail(email);
             }
         }

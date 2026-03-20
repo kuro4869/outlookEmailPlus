@@ -70,9 +70,11 @@
         '去标签': 'Remove Tags',
         '移动分组': 'Move Group',
         '删除': 'Delete',
+        '🗑️ 删除': '🗑️ Delete',
         '编辑': 'Edit',
         '复制': 'Copy',
         '保存': 'Save',
+        '清空': 'Clear',
         '导入': 'Import',
         '成功': 'Success',
         '失败': 'Failed',
@@ -84,16 +86,23 @@
         '📨 收件箱': '📨 Inbox',
         '⚠️ 垃圾邮件': '⚠️ Junk Email',
         '获取邮件': 'Fetch Emails',
+        '🔄 获取邮件': '🔄 Fetch Emails',
         '当前邮箱：': 'Current mailbox:',
         '点击复制邮箱地址': 'Click to copy email address',
         '访问 GitHub 仓库': 'Open the GitHub repository',
         '已选 0 项': '0 selected',
         '返回': 'Back',
         '全屏查看': 'Fullscreen',
+        '🔍 全屏查看': '🔍 Fullscreen',
         '验证码': 'Verification',
         '🔑 验证码': '🔑 Verification',
+        '提取验证码': 'Extract Verification',
         '信任此邮件': 'Trust this email',
         '选择一封邮件查看详情': 'Select an email to view details',
+        '发件人': 'From',
+        '收件人': 'To',
+        '抄送': 'Cc',
+        '时间': 'Time',
         '无主题': 'No Subject',
         '创建': 'Create',
         '创建第一个临时邮箱': 'Create the first temp mailbox',
@@ -257,6 +266,8 @@
         '已在新窗口打开授权页面': 'Authorization page opened in a new window',
         '请先粘贴授权后的完整 URL': 'Please paste the full redirected URL first',
         '✅ Token 获取成功！请将邮箱和密码替换后点导入': 'Token received. Replace the email and password, then import.',
+        '换取 Token': 'Exchange Token',
+        '⏳ 换取中...': '⏳ Exchanging...',
         '加载设置失败': 'Failed to load settings',
         '多 Key 配置必须是合法 JSON': 'Multiple API keys must be valid JSON',
         '多 Key 配置必须是 JSON 数组': 'Multiple API keys must be a JSON array',
@@ -291,6 +302,7 @@
         '标签已删除': 'Tag deleted',
         '删除失败': 'Delete failed',
         '操作失败': 'Operation failed',
+        '删除标签失败': 'Failed to delete tag',
         '请选择目标分组': 'Please select a target group',
         '暂无分组': 'No groups yet',
         '暂无刷新记录': 'No refresh records yet',
@@ -341,6 +353,8 @@
         '重试': 'Retry',
         '重试中...': 'Retrying...',
         '正在重试失败的账号...': 'Retrying failed accounts...',
+        '隐藏列表': 'Hide List',
+        '显示列表': 'Show List',
         '轮询中': 'Polling',
         '是否停止轮询？': 'Stop polling?',
         '刷新中...': 'Refreshing...',
@@ -354,6 +368,9 @@
         '秒后继续...': 'seconds before continuing...',
         '请输入有效的十六进制颜色（如 #FF5500）': 'Please enter a valid hexadecimal color such as #FF5500',
         '换取 Token 失败': 'Failed to exchange token',
+        '搜索中…': 'Searching...',
+        '搜索失败': 'Search failed',
+        '搜索失败，请重试': 'Search failed. Please try again.',
         '请选择要导出的分组': 'Please select the groups to export',
         '支持混合格式，每行一个账号...\nOutlook: 邮箱----密码----client_id----refresh_token\nIMAP: 邮箱----授权码----provider\n或: 邮箱----密码（自动识别类型）\nGPTMail: 仅邮箱地址': 'Mixed formats are supported, one account per line...\nOutlook: email----password----client_id----refresh_token\nIMAP: email----app-password----provider\nOr: email----password (auto-detect type)\nGPTMail: email only',
         '智能识别模式：自动按每行格式和邮箱域名判断类型，自动分组': 'Smart detection mode: identify account type by line format and email domain, then group automatically',
@@ -417,13 +434,16 @@
         '导出文件包含敏感信息（Refresh Token），请妥善保管': 'The export file contains sensitive information (Refresh Token). Keep it secure',
         '确认导出': 'Confirm Export',
         'Token 刷新管理': 'Token Refresh Manager',
+        '🔄 Token 刷新管理': '🔄 Token Refresh Manager',
         '刷新统计': 'Refresh Summary',
         '上次全量刷新': 'Last full refresh',
         '总邮箱数': 'Total mailboxes',
         '成功邮箱': 'Successful mailboxes',
         '失败邮箱': 'Failed mailboxes',
         '全量刷新': 'Refresh All',
+        '🔄 全量刷新': '🔄 Refresh All',
         '重试失败': 'Retry Failed',
+        '🔁 重试失败': '🔁 Retry Failed',
         '失败邮箱': 'Failed Mailboxes',
         '刷新历史': 'Refresh History',
         '手动': 'Manual',
@@ -434,6 +454,7 @@
         '当前失败状态的邮箱': 'Mailboxes currently in failed state',
         '隐藏': 'Hide',
         '全量刷新历史': 'Full Refresh History',
+        '暂无失败状态的邮箱': 'No failed mailboxes',
         '请从左侧选择一个邮箱账号': 'Select an email account from the left',
         '选择一个临时邮箱查看邮件': 'Select a temp mailbox to view messages',
         '该分组暂无邮箱': 'No mailboxes in this group',
@@ -448,6 +469,7 @@
         '推送': 'Notifications',
         '🔔 推送': '🔔 Notifications',
         '点击关闭推送': 'Click to disable notifications',
+        '点击复制': 'Click to copy',
         '暂无审计记录': 'No audit logs yet',
         '加载审计日志失败': 'Failed to load audit logs',
         '标签名称': 'Tag Name',
@@ -461,7 +483,9 @@
         '近半年刷新历史（共': 'Refresh history for the last six months (total ',
         '查看错误': 'View error',
         '点击关闭推送': 'Click to disable notifications',
-        '移动到分组': 'Move to Group'
+        '移动到分组': 'Move to Group',
+        '未设置（设置后可通过 /api/external/* 对外开放接口读取邮件与验证码）': 'Not configured yet. After saving, /api/external/* can expose emails and verification codes.',
+        '⚠️ 警告：启用信任模式将直接显示邮件原始内容，不进行任何安全过滤。\n\n这可能包含恶意脚本或不安全的内容。您确定要继续吗？': '⚠️ Warning: Trust mode shows the raw email content without any safety filtering.\n\nThis may include malicious scripts or unsafe content. Do you want to continue?'
     };
 
     const reverseMap = Object.fromEntries(
@@ -487,7 +511,11 @@
         { zh: /^重试完成！成功: (\d+), 失败: (\d+)$/, en: 'Retry completed. Success: $1, Failed: $2' },
         { zh: /^账号：(.+)$/, en: 'Account: $1' },
         { zh: /^临时邮箱已生成: (.+)$/, en: 'Temp mailbox created: $1' },
+        { zh: /^(.+) \(临时\)$/, en: '$1 (Temp)' },
+        { zh: /^当前已配置 (\d+) 个多 Key。保留已有脱敏 api_key 表示不修改该 Key；清空后保存表示清空全部多 Key。$/, en: '$1 API keys configured. Keeping a masked api_key leaves it unchanged; saving an empty value clears all multi-key entries.' },
         { zh: /^当前邮箱：(.+)$/, en: 'Current mailbox: $1' },
+        { zh: /^搜索结果 \((\d+)\)$/, en: 'Search Results ($1)' },
+        { zh: /^近半年刷新历史（共 (\d+) 条）$/, en: 'Refresh history for the last six months (total $1)' },
         { zh: /^确认删除账号 (.+)\?$/, en: 'Delete account $1?' },
         { zh: /^确定要删除账号 (.+) 吗？$/, en: 'Delete account $1?' },
         { zh: /^确定要删除临时邮箱 (.+) 吗？\n该邮箱的所有邮件也将被删除。$/, en: 'Delete temp mailbox $1?\nAll messages in this mailbox will also be deleted.' },
@@ -521,7 +549,11 @@
         { en: /^Retry completed\. Success: (\d+), Failed: (\d+)$/, zh: '重试完成！成功: $1, 失败: $2' },
         { en: /^Account: (.+)$/, zh: '账号：$1' },
         { en: /^Temp mailbox created: (.+)$/, zh: '临时邮箱已生成: $1' },
+        { en: /^(.+) \(Temp\)$/, zh: '$1 (临时)' },
+        { en: /^(\d+) API keys configured\. Keeping a masked api_key leaves it unchanged; saving an empty value clears all multi-key entries\.$/, zh: '当前已配置 $1 个多 Key。保留已有脱敏 api_key 表示不修改该 Key；清空后保存表示清空全部多 Key。' },
         { en: /^Current mailbox: (.+)$/, zh: '当前邮箱：$1' },
+        { en: /^Search Results \((\d+)\)$/, zh: '搜索结果 ($1)' },
+        { en: /^Refresh history for the last six months \(total (\d+)\)$/, zh: '近半年刷新历史（共 $1 条）' },
         { en: /^Delete account (.+)\?$/, zh: '确定要删除账号 $1 吗？' },
         { en: /^Delete temp mailbox (.+)\?\nAll messages in this mailbox will also be deleted\.$/, zh: '确定要删除临时邮箱 $1 吗？\n该邮箱的所有邮件也将被删除。' },
         { en: /^Clear all messages in temp mailbox (.+)\?$/, zh: '确定要清空临时邮箱 $1 的所有邮件吗？' },
@@ -580,7 +612,10 @@
         if (!value) {
             return;
         }
-        element.setAttribute(attrName, translateAppText(value));
+        const translated = translateAppText(value);
+        if (translated !== value) {
+            element.setAttribute(attrName, translated);
+        }
     }
 
     function translateNode(root) {
@@ -591,7 +626,10 @@
         if (root.nodeType === Node.TEXT_NODE) {
             const value = root.nodeValue;
             if (value && value.trim()) {
-                root.nodeValue = translateAppText(value);
+                const translated = translateAppText(value);
+                if (translated !== value) {
+                    root.nodeValue = translated;
+                }
             }
             return;
         }
@@ -604,14 +642,20 @@
         translateAttribute(root, 'title');
         translateAttribute(root, 'aria-label');
         if (root.tagName === 'INPUT' && root.type === 'button' && root.value) {
-            root.value = translateAppText(root.value);
+            const translatedValue = translateAppText(root.value);
+            if (translatedValue !== root.value) {
+                root.value = translatedValue;
+            }
         }
         root.querySelectorAll('[placeholder],[title],[aria-label],input[type="button"][value]').forEach((element) => {
             translateAttribute(element, 'placeholder');
             translateAttribute(element, 'title');
             translateAttribute(element, 'aria-label');
             if (element.tagName === 'INPUT' && element.type === 'button' && element.value) {
-                element.value = translateAppText(element.value);
+                const translatedValue = translateAppText(element.value);
+                if (translatedValue !== element.value) {
+                    element.value = translatedValue;
+                }
             }
         });
 
@@ -625,7 +669,10 @@
                 return;
             }
             if (node.nodeValue && node.nodeValue.trim()) {
-                node.nodeValue = translateAppText(node.nodeValue);
+                const translated = translateAppText(node.nodeValue);
+                if (translated !== node.nodeValue) {
+                    node.nodeValue = translated;
+                }
             }
         });
     }
@@ -764,10 +811,33 @@
     function observeMutations() {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
-                mutation.addedNodes.forEach((node) => translateNode(node));
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach((node) => translateNode(node));
+                    return;
+                }
+                if (mutation.type === 'characterData') {
+                    translateNode(mutation.target);
+                    return;
+                }
+                if (mutation.type === 'attributes' && mutation.target) {
+                    if (mutation.attributeName === 'value' && mutation.target.tagName === 'INPUT' && mutation.target.type === 'button') {
+                        const translatedValue = translateAppText(mutation.target.value);
+                        if (translatedValue !== mutation.target.value) {
+                            mutation.target.value = translatedValue;
+                        }
+                    } else if (mutation.attributeName) {
+                        translateAttribute(mutation.target, mutation.attributeName);
+                    }
+                }
             });
         });
-        observer.observe(document.body, { childList: true, subtree: true });
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+            attributes: true,
+            attributeFilter: ['placeholder', 'title', 'aria-label', 'value']
+        });
     }
 
     const nativeConfirm = window.confirm.bind(window);

@@ -79,7 +79,9 @@ def _get_email_notification_interval(app) -> int:
     except Exception:
         fallback = 60
     try:
-        override = int(str(os.getenv("EMAIL_NOTIFICATION_POLL_INTERVAL", "")).strip() or "0")
+        override = int(
+            str(os.getenv("EMAIL_NOTIFICATION_POLL_INTERVAL", "")).strip() or "0"
+        )
         if override > 0:
             return max(15, override)
     except Exception:
@@ -94,8 +96,13 @@ def _get_notification_dispatch_interval(app) -> int:
     """
     try:
         with app.app_context():
-            email_enabled = settings_repo.get_setting("email_notification_enabled", "false").lower() == "true"
-            recipient = settings_repo.get_setting("email_notification_recipient", "").strip()
+            email_enabled = (
+                settings_repo.get_setting("email_notification_enabled", "false").lower()
+                == "true"
+            )
+            recipient = settings_repo.get_setting(
+                "email_notification_recipient", ""
+            ).strip()
     except Exception:
         email_enabled = False
         recipient = ""
@@ -233,7 +240,9 @@ def _configure_pool_maintenance_jobs(scheduler) -> None:
 
             conn = create_sqlite_connection()
             try:
-                row = conn.execute("SELECT value FROM settings WHERE key = 'pool_cooldown_seconds'").fetchone()
+                row = conn.execute(
+                    "SELECT value FROM settings WHERE key = 'pool_cooldown_seconds'"
+                ).fetchone()
                 cooldown_seconds = int(row["value"]) if row and row["value"] else 86400
                 recovered = pool_repo.recover_cooldown(conn, cooldown_seconds)
                 if recovered:
@@ -275,9 +284,16 @@ def configure_scheduler_jobs(scheduler, app, test_refresh_token) -> None:
         return
 
     with app.app_context():
-        enable_scheduled = settings_repo.get_setting("enable_scheduled_refresh", "true").lower() == "true"
-        use_cron = settings_repo.get_setting("use_cron_schedule", "false").lower() == "true"
-        refresh_interval_days = int(settings_repo.get_setting("refresh_interval_days", "30"))
+        enable_scheduled = (
+            settings_repo.get_setting("enable_scheduled_refresh", "true").lower()
+            == "true"
+        )
+        use_cron = (
+            settings_repo.get_setting("use_cron_schedule", "false").lower() == "true"
+        )
+        refresh_interval_days = int(
+            settings_repo.get_setting("refresh_interval_days", "30")
+        )
         cron_expr = settings_repo.get_setting("refresh_cron", "0 2 * * *")
 
     try:
@@ -296,7 +312,9 @@ def configure_scheduler_jobs(scheduler, app, test_refresh_token) -> None:
         misfire_grace_time=60,
     )
 
-    _configure_telegram_push_job(scheduler, app)
+    # PRD-00008 / Resolve 文档：恢复统一通知分发 Job，不再单独只挂 Telegram Job
+    # 统一通知分发 Job 内部会根据"账号是否开启通知 + 渠道是否启用"决定发送哪些渠道
+    _configure_email_notification_job(scheduler, app)
     _configure_probe_poll_job(scheduler, app)
     _configure_pool_maintenance_jobs(scheduler)
 
@@ -323,7 +341,9 @@ def configure_scheduler_jobs(scheduler, app, test_refresh_token) -> None:
             if len(parts) != 5:
                 raise ValueError("Cron 表达式格式错误，应为 5 段")
             minute, hour, day, month, day_of_week = parts
-            trigger = CronTrigger(minute=minute, hour=hour, day=day, month=month, day_of_week=day_of_week)
+            trigger = CronTrigger(
+                minute=minute, hour=hour, day=day, month=month, day_of_week=day_of_week
+            )
             scheduler.add_job(
                 func=scheduled_task,
                 trigger=trigger,
@@ -349,7 +369,9 @@ def configure_scheduler_jobs(scheduler, app, test_refresh_token) -> None:
         coalesce=True,
         misfire_grace_time=600,
     )
-    print(f"✓ 定时任务已配置：每天凌晨 2:00 检查刷新（周期：{refresh_interval_days} 天）")
+    print(
+        f"✓ 定时任务已配置：每天凌晨 2:00 检查刷新（周期：{refresh_interval_days} 天）"
+    )
 
 
 def init_scheduler(app, test_refresh_token):
@@ -392,9 +414,17 @@ def scheduled_refresh_task(app, test_refresh_token):
 
     try:
         with app.app_context():
-            enable_scheduled = settings_repo.get_setting("enable_scheduled_refresh", "true").lower() == "true"
-            use_cron = settings_repo.get_setting("use_cron_schedule", "false").lower() == "true"
-            refresh_interval_days = int(settings_repo.get_setting("refresh_interval_days", "30"))
+            enable_scheduled = (
+                settings_repo.get_setting("enable_scheduled_refresh", "true").lower()
+                == "true"
+            )
+            use_cron = (
+                settings_repo.get_setting("use_cron_schedule", "false").lower()
+                == "true"
+            )
+            refresh_interval_days = int(
+                settings_repo.get_setting("refresh_interval_days", "30")
+            )
             delay_seconds = int(settings_repo.get_setting("refresh_delay_seconds", "5"))
 
         run_id = create_refresh_run(conn, "scheduled", trace_id, total=0)
@@ -436,13 +466,19 @@ def scheduled_refresh_task(app, test_refresh_token):
                         return
 
         # 获取刷新间隔配置
-        delay_row = conn.execute("SELECT value FROM settings WHERE key = 'refresh_delay_seconds'").fetchone()
+        delay_row = conn.execute(
+            "SELECT value FROM settings WHERE key = 'refresh_delay_seconds'"
+        ).fetchone()
         delay_seconds = int(delay_row["value"]) if delay_row else 5
 
         # 清理超过半年的刷新记录
         try:
-            conn.execute("DELETE FROM account_refresh_logs WHERE created_at < datetime('now', '-6 months')")
-            conn.execute("DELETE FROM distributed_locks WHERE expires_at < ?", (time.time(),))
+            conn.execute(
+                "DELETE FROM account_refresh_logs WHERE created_at < datetime('now', '-6 months')"
+            )
+            conn.execute(
+                "DELETE FROM distributed_locks WHERE expires_at < ?", (time.time(),)
+            )
             conn.commit()
         except Exception:
             pass
@@ -465,9 +501,13 @@ def scheduled_refresh_task(app, test_refresh_token):
         ttl_seconds = max(60 * 60 * 2, estimated)
         ttl_seconds = min(ttl_seconds, 60 * 60 * 24)
 
-        ok, lock_info = acquire_distributed_lock(conn, REFRESH_LOCK_NAME, lock_owner_id, ttl_seconds)
+        ok, lock_info = acquire_distributed_lock(
+            conn, REFRESH_LOCK_NAME, lock_owner_id, ttl_seconds
+        )
         if not ok:
-            finish_refresh_run(conn, run_id, "skipped", total, 0, 0, "刷新任务冲突：已有刷新在执行")
+            finish_refresh_run(
+                conn, run_id, "skipped", total, 0, 0, "刷新任务冲突：已有刷新在执行"
+            )
             return
         lock_acquired = True
 
@@ -482,7 +522,11 @@ def scheduled_refresh_task(app, test_refresh_token):
 
             # 解密 refresh_token
             try:
-                refresh_token = decrypt_data(encrypted_refresh_token) if encrypted_refresh_token else encrypted_refresh_token
+                refresh_token = (
+                    decrypt_data(encrypted_refresh_token)
+                    if encrypted_refresh_token
+                    else encrypted_refresh_token
+                )
             except Exception as e:
                 failed_count += 1
                 error_msg = f"解密 token 失败: {str(e)}"
@@ -511,13 +555,17 @@ def scheduled_refresh_task(app, test_refresh_token):
             group_id = account["group_id"]
             if group_id:
                 try:
-                    group_row = conn.execute("SELECT proxy_url FROM groups WHERE id = ?", (group_id,)).fetchone()
+                    group_row = conn.execute(
+                        "SELECT proxy_url FROM groups WHERE id = ?", (group_id,)
+                    ).fetchone()
                     if group_row:
                         proxy_url = group_row["proxy_url"] or ""
                 except Exception:
                     proxy_url = ""
 
-            success, error_msg, new_refresh_token = test_refresh_token(client_id, refresh_token, proxy_url)
+            success, error_msg, new_refresh_token = test_refresh_token(
+                client_id, refresh_token, proxy_url
+            )
 
             try:
                 conn.execute(
@@ -537,7 +585,11 @@ def scheduled_refresh_task(app, test_refresh_token):
 
                 if success:
                     # refresh token 可能滚动更新：保存新的 refresh_token（加密存储）
-                    if isinstance(new_refresh_token, str) and new_refresh_token.strip() and new_refresh_token != refresh_token:
+                    if (
+                        isinstance(new_refresh_token, str)
+                        and new_refresh_token.strip()
+                        and new_refresh_token != refresh_token
+                    ):
                         conn.execute(
                             """
                             UPDATE accounts
@@ -600,7 +652,9 @@ def should_autostart_scheduler() -> bool:
         return False
 
     # Flask CLI (flask run) + reloader：父进程不启动
-    if config.env_true("FLASK_RUN_FROM_CLI", False) and not config.env_true("WERKZEUG_RUN_MAIN", False):
+    if config.env_true("FLASK_RUN_FROM_CLI", False) and not config.env_true(
+        "WERKZEUG_RUN_MAIN", False
+    ):
         return False
 
     return True

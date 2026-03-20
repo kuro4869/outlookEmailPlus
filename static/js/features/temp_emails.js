@@ -131,7 +131,7 @@
             const bar = document.getElementById('currentAccountBar');
             if (bar) bar.style.display = '';
             const emailLabel = document.getElementById('currentAccountEmail');
-            if (emailLabel) emailLabel.textContent = email + ' (临时)';
+            if (emailLabel) emailLabel.textContent = getUiLanguage() === 'en' ? `${email} (Temp)` : `${email} (临时)`;
 
             // Update active state on all account cards
             document.querySelectorAll('.account-card').forEach(item => {
@@ -314,7 +314,7 @@
             } finally {
                 if (refreshBtn) {
                     refreshBtn.disabled = false;
-                    refreshBtn.textContent = '🔄 获取邮件';
+                    refreshBtn.textContent = translateAppTextLocal('🔄 获取邮件');
                 }
             }
         }

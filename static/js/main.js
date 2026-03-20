@@ -847,7 +847,7 @@ ${details}
             // 重置按钮状态
             const btn = document.getElementById('exchangeTokenBtn');
             btn.disabled = false;
-            btn.textContent = '换取 Token';
+            btn.textContent = translateAppTextLocal('换取 Token');
             btn.style.display = '';
 
             // 获取授权 URL
@@ -898,7 +898,7 @@ ${details}
 
             const btn = document.getElementById('exchangeTokenBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ 换取中...';
+            btn.textContent = translateAppTextLocal('⏳ 换取中...');
 
             try {
                 const response = await fetch('/api/oauth/exchange-token', {
@@ -915,7 +915,7 @@ ${details}
 
                 if (data.success) {
                     btn.disabled = false;
-                    btn.textContent = '换取 Token';
+                    btn.textContent = translateAppTextLocal('换取 Token');
 
                     // 关闭 Token 弹窗，打开添加账号弹窗并预填充
                     hideGetRefreshTokenModal();
@@ -931,12 +931,12 @@ ${details}
                 } else {
                     handleApiError(data, '换取 Token 失败');
                     btn.disabled = false;
-                    btn.textContent = '换取 Token';
+                    btn.textContent = translateAppTextLocal('换取 Token');
                 }
             } catch (error) {
                 showToast(`${translateAppTextLocal('换取 Token 失败')}: ${error.message}`, 'error');
                 btn.disabled = false;
-                btn.textContent = '换取 Token';
+                btn.textContent = translateAppTextLocal('换取 Token');
             }
         }
 
@@ -991,9 +991,9 @@ ${details}
             if (!hintEl) return;
 
             if (normalized.length > 0) {
-                hintEl.textContent = `当前已配置 ${normalized.length} 个多 Key。保留已有脱敏 api_key 表示不修改该 Key；清空后保存表示清空全部多 Key。`;
+                hintEl.textContent = translateAppTextLocal(`当前已配置 ${normalized.length} 个多 Key。保留已有脱敏 api_key 表示不修改该 Key；清空后保存表示清空全部多 Key。`);
             } else {
-                hintEl.textContent = '用于按调用方维护多个 Key、邮箱范围授权和启停状态。保留已有脱敏 api_key 表示不修改该 Key；清空后保存表示清空全部多 Key。';
+                hintEl.textContent = translateAppTextLocal('用于按调用方维护多个 Key、邮箱范围授权和启停状态。保留已有脱敏 api_key 表示不修改该 Key；清空后保存表示清空全部多 Key。');
             }
         }
 
@@ -1030,7 +1030,7 @@ ${details}
                         if (data.settings.external_api_key_set) {
                             externalHintEl.textContent = translateAppTextLocal(`已设置：${data.settings.external_api_key_masked || ''}`);
                         } else {
-                            externalHintEl.textContent = '未设置（设置后可通过 /api/external/* 对外开放接口读取邮件与验证码）';
+                            externalHintEl.textContent = translateAppTextLocal('未设置（设置后可通过 /api/external/* 对外开放接口读取邮件与验证码）');
                         }
                     }
 
@@ -1752,13 +1752,13 @@ ${details}
             const refreshAllBtn = document.getElementById('refreshAllBtn');
             if (refreshAllBtn) {
                 refreshAllBtn.disabled = false;
-                refreshAllBtn.textContent = '🔄 全量刷新';
+                refreshAllBtn.textContent = translateAppTextLocal('🔄 全量刷新');
             }
 
             const retryFailedBtn = document.getElementById('retryFailedBtn');
             if (retryFailedBtn) {
                 retryFailedBtn.disabled = false;
-                retryFailedBtn.textContent = '🔁 重试失败';
+                retryFailedBtn.textContent = translateAppTextLocal('🔁 重试失败');
             }
         }
 
