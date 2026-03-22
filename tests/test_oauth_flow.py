@@ -60,6 +60,21 @@ class OAuthFlowTests(unittest.TestCase):
         self.assertTrue(query.get("state", [""])[0])
         self.assertNotEqual(query.get("state", [""])[0], "12345")
 
+    @patch("outlook_web.controllers.oauth.config.get_oauth_redirect_uri", return_value="https://prod.example.com/oauth/callback")
+    @patch("outlook_web.controllers.oauth.config.get_oauth_client_id", return_value="client-from-config")
+    def test_oauth_auth_url_returns_redirect_warning_when_origin_differs(self, _mock_client_id, _mock_redirect_uri):
+        client = self.app.test_client()
+        self._login(client)
+
+        resp = client.get("/api/oauth/auth-url")
+
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertEqual(data.get("redirect_uri"), "https://prod.example.com/oauth/callback")
+        self.assertIn("redirect_uri", data.get("redirect_uri_warning", ""))
+        self.assertIn("prod.example.com", data.get("redirect_uri_warning", ""))
+        self.assertIn("localhost", data.get("redirect_uri_warning", ""))
+
     def test_oauth_callback_page_posts_message_to_opener(self):
         client = self.app.test_client()
 
@@ -128,6 +143,40 @@ class OAuthFlowTests(unittest.TestCase):
         self.assertEqual(data.get("token_type"), "Bearer")
 
     @patch("outlook_web.controllers.oauth.requests.post")
+    @patch("outlook_web.controllers.oauth.config.get_oauth_client_id", return_value="client-from-config")
+    def test_exchange_token_accepts_query_string_only_input(self, _mock_client_id, mock_post):
+        client = self.app.test_client()
+        self._login(client)
+        headers = {"User-Agent": "oauth-flow-test"}
+        verify_token = self._issue_verify_token(client, headers=headers)
+        oauth_state = self._issue_oauth_state(client)
+
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.headers = {"content-type": "application/json"}
+        mock_response.json.return_value = {
+            "refresh_token": "refresh-token-query-only",
+            "token_type": "Bearer",
+            "expires_in": 3600,
+            "scope": "offline_access User.Read",
+        }
+        mock_post.return_value = mock_response
+
+        resp = client.post(
+            "/api/oauth/exchange-token",
+            json={
+                "redirected_url": f"?code=test-code&state={oauth_state}",
+                "verify_token": verify_token,
+            },
+            headers=headers,
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertTrue(data.get("success"))
+        self.assertEqual(data.get("refresh_token"), "refresh-token-query-only")
+
+    @patch("outlook_web.controllers.oauth.requests.post")
     def test_exchange_token_rejects_bound_verify_token_before_redeeming_code(self, mock_post):
         client = self.app.test_client()
         self._login(client)
@@ -147,6 +196,48 @@ class OAuthFlowTests(unittest.TestCase):
 
         self.assertEqual(data.get("code"), "EXPORT_VERIFY_CLIENT_MISMATCH")
         mock_post.assert_not_called()
+
+    @patch("outlook_web.controllers.oauth.requests.post")
+    @patch("outlook_web.controllers.oauth.config.get_oauth_client_id", return_value="client-from-config")
+    def test_exchange_token_bound_failure_does_not_consume_verify_token_or_state(self, _mock_client_id, mock_post):
+        client = self.app.test_client()
+        self._login(client)
+        verify_token = self._issue_verify_token(client, headers={"User-Agent": "ua-a"})
+        oauth_state = self._issue_oauth_state(client)
+
+        rejected = client.post(
+            "/api/oauth/exchange-token",
+            json={
+                "redirected_url": f"http://localhost/oauth/callback?code=test-code&state={oauth_state}",
+                "verify_token": verify_token,
+            },
+            headers={"User-Agent": "ua-b"},
+        )
+        self.assertEqual(rejected.status_code, 401)
+        self.assertEqual(rejected.get_json().get("code"), "EXPORT_VERIFY_CLIENT_MISMATCH")
+
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.headers = {"content-type": "application/json"}
+        mock_response.json.return_value = {
+            "refresh_token": "refresh-token-retry",
+            "token_type": "Bearer",
+            "expires_in": 3600,
+            "scope": "offline_access User.Read",
+        }
+        mock_post.return_value = mock_response
+
+        retried = client.post(
+            "/api/oauth/exchange-token",
+            json={
+                "redirected_url": f"http://localhost/oauth/callback?code=test-code&state={oauth_state}",
+                "verify_token": verify_token,
+            },
+            headers={"User-Agent": "ua-a"},
+        )
+        self.assertEqual(retried.status_code, 200)
+        self.assertTrue(retried.get_json().get("success"))
+        self.assertEqual(retried.get_json().get("refresh_token"), "refresh-token-retry")
 
     @patch("outlook_web.controllers.oauth.config.get_oauth_client_id", return_value="client-from-config")
     def test_exchange_token_rejects_redirect_uri_mismatch(self, _mock_client_id):

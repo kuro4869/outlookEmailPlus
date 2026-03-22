@@ -355,6 +355,56 @@ class TempEmailImageSupportTests(unittest.TestCase):
         self.assertEqual(data["email"]["body_type"], "html")
         detail_mock.assert_called_once()
 
+    def test_temp_email_detail_refreshes_cached_cid_html_without_inline_resource_mapping(self):
+        client = self.app.test_client()
+        self._login(client)
+        email_addr = "cid-refresh@test.example"
+        self._insert_temp_email(email_addr)
+
+        with self.app.app_context():
+            from outlook_web.repositories import temp_emails as temp_emails_repo
+
+            temp_emails_repo.save_temp_email_messages(
+                email_addr,
+                [
+                    {
+                        "id": "temp-cid-refresh-1",
+                        "from_address": "sender@example.com",
+                        "subject": "cid refresh",
+                        "html_content": '<div><img src="cid:captcha-refresh" alt="captcha"></div>',
+                        "has_html": True,
+                        "timestamp": 1772407212,
+                    }
+                ],
+            )
+
+        with patch(
+            "outlook_web.services.gptmail.get_temp_email_detail_from_api",
+            return_value={
+                "id": "temp-cid-refresh-1",
+                "from_address": "sender@example.com",
+                "subject": "cid refresh",
+                "html_content": '<div><img src="cid:captcha-refresh" alt="captcha"></div>',
+                "has_html": True,
+                "timestamp": 1772407212,
+                "attachments": [
+                    {
+                        "content_id": "captcha-refresh",
+                        "content_type": "image/png",
+                        "content_base64": "QUJDRA==",
+                        "is_inline": True,
+                    }
+                ],
+            },
+        ) as detail_mock:
+            resp = client.get(f"/api/temp-emails/{email_addr}/messages/temp-cid-refresh-1")
+
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertEqual(data["email"]["body_type"], "html")
+        self.assertIn("data:image/png;base64,QUJDRA==", data["email"]["body"])
+        detail_mock.assert_called_once()
+
 
 class TempEmailImageFrontendContractTests(unittest.TestCase):
     @classmethod
